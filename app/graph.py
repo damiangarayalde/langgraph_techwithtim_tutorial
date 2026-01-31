@@ -1,10 +1,5 @@
-
 from langgraph.graph import StateGraph, START, END
-from typing import TypedDict, List, Optional, Dict, Any
-from langchain_core.messages import BaseMessage
-from typing import Annotated, Literal
-from langgraph.graph.message import add_messages
-
+from app.types import ChatState
 from app.nodes import (
     classify_message_node,
     sales_agent_node,
@@ -13,16 +8,10 @@ from app.nodes import (
 )
 
 
-class State(TypedDict):
-    # The graph state holds the conversation messages and optional metadata
-    messages: Annotated[list, add_messages]
-    message_type: str | None
-
-
-def build_graph():
+def build_graph() -> StateGraph:
 
     # Create the state graph that models the conversation flow
-    g = StateGraph(State)
+    g = StateGraph(ChatState)
 
     # Add processing nodes to the graph
     g.add_node("classifier", classify_message_node)

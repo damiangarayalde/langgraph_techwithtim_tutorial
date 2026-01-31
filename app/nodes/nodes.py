@@ -4,18 +4,12 @@ from langgraph.graph.message import add_messages
 from langchain.chat_models import init_chat_model
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
-
+from app.types import ChatState
 
 load_dotenv()
 
 # Initialize the chat model used by the application
 llm = init_chat_model(model="gpt-4o-mini")
-
-
-class State(TypedDict):
-    # The graph state holds the conversation messages and optional metadata
-    messages: Annotated[list, add_messages]
-    message_type: str | None
 
 
 class MessageClassifier_output_format(BaseModel):
@@ -28,7 +22,7 @@ class MessageClassifier_output_format(BaseModel):
 # Node implementations --------------------------------------------------------------------------------------------------------------
 
 
-def classify_message_node(state: State) -> State:
+def classify_message_node(state: ChatState) -> ChatState:
 
     # Use the last user message to determine whether it's a sales or support request
     last_message = state["messages"][-1]
@@ -48,7 +42,7 @@ def classify_message_node(state: State) -> State:
     return {"message_type": result.message_type}
 
 
-def techsupport_agent_node(state: State) -> State:
+def techsupport_agent_node(state: ChatState) -> ChatState:
     # Handle technical support inquiries by forwarding the user's message to LLM
     last_message = state["messages"][-1]
     message = [
@@ -61,7 +55,7 @@ def techsupport_agent_node(state: State) -> State:
     return {"messages": [reply]}
 
 
-def sales_agent_node(state: State) -> State:
+def sales_agent_node(state: ChatState) -> ChatState:
     # Handle sales-related messages
     last_message = state["messages"][-1]
     message = [
@@ -73,7 +67,7 @@ def sales_agent_node(state: State) -> State:
     return {"messages": [reply]}
 
 
-def router_node(state: State) -> State:
+def router_node(state: ChatState) -> ChatState:
     # Decide which agent node to invoke next based on classifier output
     message_type = state.get("message_type", "soporte")
     if message_type == "ventas":
