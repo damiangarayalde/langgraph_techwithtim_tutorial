@@ -22,7 +22,7 @@ class MessageClassifier_output_format(BaseModel):
 # Node implementations --------------------------------------------------------------------------------------------------------------
 
 
-def determine_intent_node(state: ChatState) -> ChatState:
+def node__determine_user_intent(state: ChatState) -> ChatState:
 
     # Use the last user message to determine whether it's a sales or support request
     last_message = state["messages"][-1]
@@ -42,7 +42,7 @@ def determine_intent_node(state: ChatState) -> ChatState:
     return {"message_type": result.message_type}
 
 
-def techsupport_agent_node(state: ChatState) -> ChatState:
+def node__techsupport_agent(state: ChatState) -> ChatState:
     # Handle technical support inquiries by forwarding the user's message to LLM
     last_message = state["messages"][-1]
     message = [
@@ -55,7 +55,7 @@ def techsupport_agent_node(state: ChatState) -> ChatState:
     return {"messages": [reply]}
 
 
-def sales_agent_node(state: ChatState) -> ChatState:
+def node__sales_agent(state: ChatState) -> ChatState:
     # Handle sales-related messages
     last_message = state["messages"][-1]
     message = [
@@ -67,7 +67,7 @@ def sales_agent_node(state: ChatState) -> ChatState:
     return {"messages": [reply]}
 
 
-def router_node(state: ChatState) -> ChatState:
+def node__handle_user_intent(state: ChatState) -> ChatState:
     # Decide which agent node to invoke next based on classifier output
     message_type = state.get("message_type", "soporte")
     if message_type == "ventas":
