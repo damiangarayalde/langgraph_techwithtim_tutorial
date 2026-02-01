@@ -21,13 +21,13 @@ def make_route_subgraph(route_id: str) -> StateGraph:
     def generate(state: ChatState) -> ChatState:
         """Generate an answer using the LLM.
         """
-        user_text = state["messages"][-1]
+        user_text = state["messages"][-1].content
         print(f"Invoking node for handling route: {route_id}...")
 
         message = [
             {"role": "system",
                 "content": f"Eres un agente que responde consultas de {route_id}."},
-            {"role": "user", "content": user_text.content}
+            {"role": "human", "content": user_text}
         ]
         reply = llm.invoke(message)
         # Return the assistant reply wrapped in the state's messages field
