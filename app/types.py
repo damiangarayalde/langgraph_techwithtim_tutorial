@@ -1,6 +1,7 @@
-from typing import TypedDict
+from typing import TypedDict, List
 from typing import Annotated
 from langgraph.graph.message import add_messages
+from langchain_core.messages import BaseMessage
 
 
 class ChatState(TypedDict):
@@ -10,6 +11,5 @@ class ChatState(TypedDict):
     creating circular imports between node implementations and the main
     graph builder.
     """
-    messages: Annotated[list,
-                        add_messages]  # in new its used: List[BaseMessage]
+    messages: Annotated[List[BaseMessage], add_messages]
     handling_channel:  str | None
