@@ -13,8 +13,9 @@ class ChatState(TypedDict):
     """
     messages: Annotated[list,
                         add_messages]  # in new its used: List[BaseMessage]
-    route:  str | None
+    handling_channel:  str | None
+    product_family:  str | None
+    confidence: float | None
     attempts: Dict[str, int]
     retrieved: Optional[List[Dict[str, Any]]]
     answer:  str | None
-    message_type:  str | None

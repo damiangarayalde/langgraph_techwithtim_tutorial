@@ -12,34 +12,41 @@ load_dotenv()
 llm = init_chat_model(model="gpt-4o-mini")
 
 
-class MessageClassifier_output_format(BaseModel):
+class UserIntentClassifier_output_format(BaseModel):
     # Structured output model used to enforce the classifier's response shape
-    message_type: Literal["ventas", "soporte"] = Field(
+    handling_channel: Literal["sales", "support"] = Field(
         ...,
         description="Clasifica el tipo de mensaje como 'ventas' o 'soporte'.",
     )
+    product_family: Literal["TPMS", "AA", "CLIMATIZADOR",
+                            "GENKI", "CARJACK", "MAYORISTA", "CALDERA", "UNKNOWN"]
+    confidence: float
 
 # Node implementations --------------------------------------------------------------------------------------------------------------
 
 
-def node__determine_user_intent(state: ChatState) -> ChatState:
+def node__classify_user_intent(state: ChatState) -> ChatState:
 
-    # Use the last user message to determine whether it's a sales or support request
+    # Use the last user message to classify whether its intent requires a sales or support request
     last_message = state["messages"][-1]
 
     # Create an LLM call that produces structured output matching MessageClassifier
     classifier_llm = llm.with_structured_output(
-        MessageClassifier_output_format)
+        UserIntentClassifier_output_format)
 
     message = [
         {"role": "system", "content": "Eres un clasificador de mensajes. Clasifica el siguiente mensaje como 'ventas' o 'soporte'."},
         {"role": "user", "content": last_message.content}
     ]
-    print("Invoking determine_contact_reason_node...")
+    print("Invoking classify_user_intent_node...")
     result = classifier_llm.invoke(message)
 
-    # Return the message_type so downstream nodes can route appropriately
-    return {"message_type": result.message_type}
+    # Return the handling_channel so downstream nodes can route appropriately
+    return {
+        "handling_channel": result.handling_channel,
+        "product_family": result.product_family,
+        "confidence": result.confidence
+    }
 
 
 def node__techsupport_agent(state: ChatState) -> ChatState:
@@ -67,7 +74,7 @@ def node__sales_agent(state: ChatState) -> ChatState:
     return {"messages": [reply]}
 
 
-def node__handle_user_intent(state: ChatState) -> ChatState:
+def node__route_by_user_intent(state: ChatState) -> ChatState:
     # Decide which agent node to invoke next based on classifier output
     message_type = state.get("message_type", "soporte")
     if message_type == "ventas":
