@@ -49,36 +49,38 @@ def node__classify_user_intent(state: ChatState) -> ChatState:
         "confidence": result.confidence
     }
 
-
-def node__techsupport_agent(state: ChatState) -> ChatState:
-    # Handle technical support inquiries by forwarding the user's message to LLM
-    last_message = state["messages"][-1]
-    message = [
-        {"role": "system", "content": "Eres un agente de soporte técnico. Ayuda al usuario con sus problemas técnicos."},
-        {"role": "user", "content": last_message.content}
-    ]
-    print("Invoking techsupport_agent_node...")
-    reply = llm.invoke(message)
-    # Return the assistant reply wrapped in the state's messages field
-    return {"messages": [reply]}
-
-
-def node__sales_agent(state: ChatState) -> ChatState:
-    # Handle sales-related messages
-    last_message = state["messages"][-1]
-    message = [
-        {"role": "system", "content": "Eres un agente de ventas. Ayuda al usuario con sus preguntas sobre productos y servicios."},
-        {"role": "user", "content": last_message.content}
-    ]
-    print("Invoking sales_agent_node...")
-    reply = llm.invoke(message)
-    return {"messages": [reply]}
+# Router node: returns the node-key string that identifies the chosen channel agent node (sales or support)
 
 
 def node__route_by_user_intent(state: ChatState) -> ChatState:
-    # Decide which agent node to invoke next based on classifier output
-    handling_channel = state.get("handling_channel", "support")
-    if handling_channel == "sales":
-        return {"next": "ventas__agent"}
-    else:
-        return {"next": "soporte__agent"}
+    pf = state.get("handling_channel") or "unknown"
+    print(f'Routing based on handling_channel in state: {pf}')
+
+    # Update the state with the chosen next node key so the conditional
+    # edges selector can read it. Must return a dict (state update).
+    chosen = f"handle__{pf}"  # if pf in subgraphs else "handle__unknown"
+    return {"next": chosen}
+
+# def node__techsupport_agent(state: ChatState) -> ChatState:
+#     # Handle technical support inquiries by forwarding the user's message to LLM
+#     last_message = state["messages"][-1]
+#     message = [
+#         {"role": "system", "content": "Eres un agente de soporte técnico. Ayuda al usuario con sus problemas técnicos."},
+#         {"role": "user", "content": last_message.content}
+#     ]
+#     print("Invoking techsupport_agent_node...")
+#     reply = llm.invoke(message)
+#     # Return the assistant reply wrapped in the state's messages field
+#     return {"messages": [reply]}
+
+
+# def node__sales_agent(state: ChatState) -> ChatState:
+#     # Handle sales-related messages
+#     last_message = state["messages"][-1]
+#     message = [
+#         {"role": "system", "content": "Eres un agente de ventas. Ayuda al usuario con sus preguntas sobre productos y servicios."},
+#         {"role": "user", "content": last_message.content}
+#     ]
+#     print("Invoking sales_agent_node...")
+#     reply = llm.invoke(message)
+#     return {"messages": [reply]}
