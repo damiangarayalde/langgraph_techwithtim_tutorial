@@ -1,6 +1,5 @@
 from langgraph.graph import StateGraph, START, END
 from langchain_openai import ChatOpenAI
-from prompt_toolkit import prompt
 from app.types import ChatState
 
 
@@ -22,8 +21,6 @@ def make_route_subgraph(route_id: str) -> StateGraph:
     def generate(state: ChatState) -> ChatState:
         """Generate an answer using the LLM.
         """
-
-        # Handle technical support inquiries by forwarding the user's message to LLM
         user_text = state["messages"][-1]
         print(f"Invoking node for handling route: {route_id}...")
 

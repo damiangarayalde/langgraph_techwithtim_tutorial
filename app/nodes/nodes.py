@@ -1,9 +1,7 @@
 from dotenv import load_dotenv
-from typing import Annotated, Literal
-from langgraph.graph.message import add_messages
+from typing import Literal
 from langchain.chat_models import init_chat_model
 from pydantic import BaseModel, Field
-from typing_extensions import TypedDict
 from app.types import ChatState
 
 load_dotenv()
@@ -18,13 +16,9 @@ class UserIntentClassifier_output_format(BaseModel):
         ...,
         description="Clasifica el tipo de mensaje como 'ventas' o 'soporte'.",
     )
-    product_family: Literal["TPMS", "AA", "CLIMATIZADOR",
-                            "GENKI", "CARJACK", "MAYORISTA", "CALDERA", "UNKNOWN"]
-    confidence: float
 
 
 # Node implementations --------------------------------------------------------------------------------------------------------------
-
 
 def node__classify_user_intent(state: ChatState) -> ChatState:
 
@@ -44,15 +38,13 @@ def node__classify_user_intent(state: ChatState) -> ChatState:
 
     # Return the handling_channel so downstream nodes can route appropriately
     return {
-        "handling_channel": result.handling_channel,
-        "product_family": result.product_family,
-        "confidence": result.confidence
+        "handling_channel": result.handling_channel
     }
-
-# Router node: returns the node-key string that identifies the chosen channel agent node (sales or support)
 
 
 def node__route_by_user_intent(state: ChatState) -> ChatState:
+    # Router node: returns the node-key string that identifies the chosen channel agent node (sales or support)
+
     pf = state.get("handling_channel") or "unknown"
     print(f'Routing based on handling_channel in state: {pf}')
 
@@ -60,27 +52,3 @@ def node__route_by_user_intent(state: ChatState) -> ChatState:
     # edges selector can read it. Must return a dict (state update).
     chosen = f"handle__{pf}"  # if pf in subgraphs else "handle__unknown"
     return {"next": chosen}
-
-# def node__techsupport_agent(state: ChatState) -> ChatState:
-#     # Handle technical support inquiries by forwarding the user's message to LLM
-#     last_message = state["messages"][-1]
-#     message = [
-#         {"role": "system", "content": "Eres un agente de soporte técnico. Ayuda al usuario con sus problemas técnicos."},
-#         {"role": "user", "content": last_message.content}
-#     ]
-#     print("Invoking techsupport_agent_node...")
-#     reply = llm.invoke(message)
-#     # Return the assistant reply wrapped in the state's messages field
-#     return {"messages": [reply]}
-
-
-# def node__sales_agent(state: ChatState) -> ChatState:
-#     # Handle sales-related messages
-#     last_message = state["messages"][-1]
-#     message = [
-#         {"role": "system", "content": "Eres un agente de ventas. Ayuda al usuario con sus preguntas sobre productos y servicios."},
-#         {"role": "user", "content": last_message.content}
-#     ]
-#     print("Invoking sales_agent_node...")
-#     reply = llm.invoke(message)
-#     return {"messages": [reply]}

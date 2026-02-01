@@ -1,6 +1,5 @@
-from typing import TypedDict, List, Optional, Dict, Any
-from langchain_core.messages import BaseMessage
-from typing import Annotated, Literal
+from typing import TypedDict
+from typing import Annotated
 from langgraph.graph.message import add_messages
 
 
@@ -14,8 +13,3 @@ class ChatState(TypedDict):
     messages: Annotated[list,
                         add_messages]  # in new its used: List[BaseMessage]
     handling_channel:  str | None
-    product_family:  str | None
-    confidence: float | None
-    attempts: Dict[str, int]
-    retrieved: Optional[List[Dict[str, Any]]]
-    answer:  str | None
