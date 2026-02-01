@@ -22,7 +22,7 @@ class MessageClassifier_output_format(BaseModel):
 # Node implementations --------------------------------------------------------------------------------------------------------------
 
 
-def classify_message_node(state: ChatState) -> ChatState:
+def determine_intent_node(state: ChatState) -> ChatState:
 
     # Use the last user message to determine whether it's a sales or support request
     last_message = state["messages"][-1]
@@ -35,7 +35,7 @@ def classify_message_node(state: ChatState) -> ChatState:
         {"role": "system", "content": "Eres un clasificador de mensajes. Clasifica el siguiente mensaje como 'ventas' o 'soporte'."},
         {"role": "user", "content": last_message.content}
     ]
-    print("Invoking classify_message_node...")
+    print("Invoking determine_contact_reason_node...")
     result = classifier_llm.invoke(message)
 
     # Return the message_type so downstream nodes can route appropriately

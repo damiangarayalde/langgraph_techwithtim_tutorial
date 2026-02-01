@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph, START, END
 from app.types import ChatState
 from app.nodes import (
-    classify_message_node,
+    determine_intent_node,
     sales_agent_node,
     techsupport_agent_node,
     router_node,
@@ -14,14 +14,15 @@ def build_graph() -> StateGraph:
     g = StateGraph(ChatState)
 
     # Add processing nodes to the graph
-    g.add_node("classifier", classify_message_node)
+    g.add_node("determine_intent_nodename",
+               determine_intent_node)
     g.add_node("ventas__agent_nodename", sales_agent_node)
     g.add_node("soporte__agent_nodename", techsupport_agent_node)
     g.add_node("router", router_node)
 
-    # Connect the nodes: start -> classifier -> router -> (sales|support) -> end
-    g.add_edge(START, "classifier")
-    g.add_edge("classifier", "router")
+    # Connect the nodes: start -> determine_intent -> router -> (sales|support) -> end
+    g.add_edge(START, "determine_intent_nodename")
+    g.add_edge("determine_intent_nodename", "router")
     g.add_conditional_edges(
         "router",
         lambda state: state.get("next"),
