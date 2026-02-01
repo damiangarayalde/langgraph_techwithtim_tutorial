@@ -12,11 +12,9 @@ def run_chatbot():
 
     state = {
         "messages": [],  # start empty
-        "route": None,  # new unused field
         "attempts": {},  # new unused field
         "retrieved": None,  # new unused field
         "answer": None,  # new unused field
-        "message_type": None,
         "handling_channel": None,
         "product_family": None,
         "confidence": None,

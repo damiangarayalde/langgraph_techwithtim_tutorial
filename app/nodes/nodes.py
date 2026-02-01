@@ -22,6 +22,7 @@ class UserIntentClassifier_output_format(BaseModel):
                             "GENKI", "CARJACK", "MAYORISTA", "CALDERA", "UNKNOWN"]
     confidence: float
 
+
 # Node implementations --------------------------------------------------------------------------------------------------------------
 
 
@@ -76,8 +77,8 @@ def node__sales_agent(state: ChatState) -> ChatState:
 
 def node__route_by_user_intent(state: ChatState) -> ChatState:
     # Decide which agent node to invoke next based on classifier output
-    message_type = state.get("message_type", "soporte")
-    if message_type == "ventas":
+    handling_channel = state.get("handling_channel", "soporte")
+    if handling_channel == "ventas":
         return {"next": "ventas__agent"}
     else:
         return {"next": "soporte__agent"}
